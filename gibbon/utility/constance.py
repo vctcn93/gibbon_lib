@@ -1,0 +1,9 @@
+import math
+
+
+_X_PI = math.pi * 3000 / 180
+_PI = math.pi
+_A = 6378245
+_EE = .00669342162296594323
+_MERCATOR = 20037508.34 / 180
+_SIZE = 78271516
