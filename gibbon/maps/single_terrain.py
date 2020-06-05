@@ -3,13 +3,15 @@ import scipy.spatial as sp
 
 
 class SingleTerrain:
-    def __init__(self, matrix, density=10, size=1000):
+    def __init__(self, matrix, density=10, size=1000, coords=[0, 0]):
         self.matrix = matrix
         self.density = density
         self.size = size
         self._indices = self.calculate_indices(matrix, density)
+        self.coords = self._indices * self.size / (self.matrix.shape[0] - 1) - [self.size / 2 , self.size / 2]
         self._heights = self.calculate_heights(matrix, self._indices)
-        self._vertices = self.calculate_vertices(self._heights, self.coords)
+        self._vertices = None
+        self.move(coords)
         self.faces = self.calculate_faces(density)
         self.colours = [[255, 255, 255] for i in range(len(self.vertices))]
 
@@ -26,15 +28,6 @@ class SingleTerrain:
         return self._vertices.astype(int).tolist()
 
     @property
-    def coords(self):
-        unit_size = self.size / self.density
-        return self._indices * unit_size
-
-    @coords.setter
-    def coords(self, value):
-        self.coords = value
-
-    @property
     def mesh(self):
         return {
             'tp': 'mesh',
@@ -44,8 +37,9 @@ class SingleTerrain:
         }
 
     @staticmethod
-    def height_by_rgb(r, g, b):
-        return - 10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
+    def height_by_rgb(r, g, b, unit='mm'):
+        a = - 10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
+        return a * 1000 if unit == 'mm' else a
 
     @staticmethod
     def calculate_indices(matrix, density):
@@ -83,10 +77,11 @@ class SingleTerrain:
 
     def calculate_heights(self, matrix, indices):
         r, g, b = matrix[:, :, 0], matrix[:, :, 1], matrix[:, :, 2]
-        heights = np.vectorize(self.height_by_rgb)(r, g, b) * 1000
+        heights = np.vectorize(self.height_by_rgb)(r, g, b)
         return heights[indices[:, 0], indices[:, 1]]
 
     def move(self, vector):
         if isinstance(vector, list):
             vector = np.array(vector)
-        self.coords + vector
+        self.coords += vector
+        self._vertices = self.calculate_vertices(self._heights, self.coords)

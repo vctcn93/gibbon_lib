@@ -1,4 +1,4 @@
-from cell import Cell
+from gibbon.geometry import Cell
 
 
 class FiniteCell(Cell):

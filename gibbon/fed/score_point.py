@@ -1,6 +1,7 @@
 import uuid
 import numpy as np
-import vector_math as vmath
+from .finite_cell import FiniteCell
+import gibbon.geometry.vector_math as vmath
 
 
 class ScorePoint:

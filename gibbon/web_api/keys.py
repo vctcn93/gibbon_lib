@@ -1,0 +1,2 @@
+AMAP_KEY = 'fa1eac0178bc74acca33d7e874470704'
+MAPBOX_KEY = 'sk.eyJ1IjoidmN0Y24iLCJhIjoiY2sxaDc4ZGllMGF0dTNpanlvOXdjNmVrNCJ9.ImJfE6k-f0aMzJj6vSHEYg'

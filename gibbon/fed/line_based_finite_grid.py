@@ -1,5 +1,5 @@
-from finite_cell import FiniteCell
-import vector_math as vmath
+from .finite_cell import FiniteCell
+import gibbon.geometry.vector_math as vmath
 
 
 class LineBasedFiniteGrid:
@@ -14,8 +14,8 @@ class LineBasedFiniteGrid:
         self.curve = curve
         self.density = density
         self.line_width = line_width
-        self.score_points = list()
         self.cells = self.create_cells()
+        self.score_points = list()
         self._subjects = set()
         self.added = list()
 
