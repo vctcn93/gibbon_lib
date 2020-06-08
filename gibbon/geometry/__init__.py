@@ -1,2 +1,2 @@
-from .colour_code import ColourCode
-from .cell import Cell
+from ._colour_code import ColourCode
+from ._cell import Cell

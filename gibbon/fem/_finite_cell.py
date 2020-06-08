@@ -27,18 +27,3 @@ class FiniteCell(Cell):
 
     def subject_score(self, key) -> float:
         return sum(self._scores[key])
-
-
-if __name__ == '__main__':
-    c = FiniteCell([0, 0], 10)
-    assert c.vertices == [[-5, -5], [5, -5], [5, 5], [-5, 5]]
-    assert c.faces == [0, 1, 2, 3]
-    assert c.colours == [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]]
-    assert c.mesh == {
-        'tp': 'mesh',
-        'v': [[-5, -5], [5, -5], [5, 5], [-5, 5]],
-        'f': [0, 1, 2, 3],
-        'c': [[255, 255, 255], [255, 255, 255], [255, 255, 255], [255, 255, 255]]
-    }
-    c.set_colour([128, 128, 128])
-    assert c.colours == [[128, 128, 128], [128, 128, 128], [128, 128, 128], [128, 128, 128]]

@@ -1,52 +1,26 @@
-from .finite_cell import FiniteCell
+from ._finite_cell import FiniteCell
+from ._finite_grid import FiniteGrid
 import gibbon.geometry.vector_math as vmath
 
 
-class LineBasedFiniteGrid:
-    quantity_limit = 1000
-
+class LineBasedFiniteGrid(FiniteGrid):
     def __init__(
         self,
-        curve: list,
-        density: float,
-        line_width: float=10
+        polyline: list,
+        density: float
     ):
-        self.curve = curve
-        self.density = density
-        self.line_width = line_width
-        self.cells = self.create_cells()
+        super().__init__(polyline, density)
         self.score_points = list()
         self._subjects = set()
         self.added = list()
-
-    def create_cells(self):
-        quantity = int(self.density * self.quantity_limit)
-        length = vmath.length_of_polyline(self.curve)
-        unit = length / quantity
-        coords = [vmath.point_at_parameter_polyline(self.curve, t*unit) for t in range(quantity)]
-        return [
-            FiniteCell(coord, unit) for coord in coords
-        ]
 
     @property
     def subjects(self):
         return self._subjects
 
     @property
-    def quantity(self):
-        return len(self.cells)
-
-    @property
     def scores(self):
         return [cell.score for cell in self.cells]
-
-    @property
-    def meshes(self):
-        return [cell.mesh for cell in self.cells]
-
-    @classmethod
-    def set_quantity_limited(cls, value):
-        cls.quantity_limit = value
 
     def add_score_point(self, score_point):
         if score_point.uuid not in self.added:
@@ -68,3 +42,16 @@ class LineBasedFiniteGrid:
 
     def subject_score(self, key):
         return [cell.subject_score(key) for cell in self.cells]
+
+    def create(self):
+        super().create()
+        params = self.divide_by_quantity(self._quantity)
+        points = list()
+
+        points = [
+            vmath.point_at_parameter_polyline(
+                self._polyline, param
+            ) for param in params
+        ]
+        size = self.geo.length / self._quantity
+        self.cells = [FiniteCell(point, size) for point in points]

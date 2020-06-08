@@ -48,6 +48,8 @@ def point_at_parameter_polyline(polyline, param) -> np.ndarray:
             else:
                 aim -= lengths[i]
 
+        return [aim, i] 
+
     aim, index = f(diss, segment_lengths)
     segment = [polyline[index], polyline[index+1]]
     length = distance_point_point(segment[0], segment[1])

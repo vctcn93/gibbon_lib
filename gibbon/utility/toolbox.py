@@ -26,3 +26,13 @@ def progress_bar(num, total):
     r = '\r[{}{}]{}%'.format('*' * ratenum, ' ' * (100 - ratenum), ratenum)
     sys.stdout.write(r)
     sys.stdout.flush()
+
+
+def divide_by_quantity(quantity):
+    ls = list(range(quantity))
+    new = [0] * quantity
+
+    for i in range(quantity):
+        new[i] = ls[i] / (quantity - 1)
+
+    return new

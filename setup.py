@@ -17,7 +17,6 @@ setup(
     author_email = "vincentvane@yeah.net",
     description = ("library required to perform architecture modeling and planning"),
     license = lc,
-    ext_modules = cythonize(ext_modules,compiler_directives={'language_level':3}),
     include_dirs = [np.get_include()],
     packages=packages,
     #long_description=rm,
