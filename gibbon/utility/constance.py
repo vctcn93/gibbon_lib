@@ -1,9 +1,0 @@
-import math
-
-
-XPI = math.pi * 3000 / 180
-PI = math.pi
-A = 6378245
-EE = .00669342162296594323
-MERCATOR = 20037508.34 / 180
-SIZE = 78271516

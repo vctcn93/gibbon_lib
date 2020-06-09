@@ -1,6 +1,6 @@
 import numpy as np
 import json
-from .base_map import BaseMap
+from ._base_map import BaseMap
 from .single_terrain import SingleTerrain
 from gibbon.web_api import MapBox
 from gibbon.utility import convert
