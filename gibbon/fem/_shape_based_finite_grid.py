@@ -8,7 +8,7 @@ class ShapeBasedFiniteGrid(FiniteGrid):
     def __init__(self, geometry, density):
         super().__init__(geometry, density)
 
-    def create(self):
+    def setup(self):
         self._quantity = int(self.quantity_limit * self._density)
         self.geo = Polygon(self._polyline)
         self.cells = list()

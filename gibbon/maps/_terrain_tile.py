@@ -1,5 +1,6 @@
 import numpy as np
 from gibbon.maps import BaseTile
+from gibbon.utility import timeit
 
 
 class TerrainTile(BaseTile):
@@ -34,16 +35,25 @@ class TerrainTile(BaseTile):
         ].tolist()
 
     @property
+    def faces(self):
+        return self._faces.tolist()
+
+    @property
+    def colours(self):
+        return self._colours
+
+    @property
     def vertices(self):
         return self._vertices.tolist()
 
     @staticmethod
     def height_by_rgb(r, g, b, unit='mm'):
-        a = - 10000 + ((r * 256 * 256 + g * 256 + b) * 0.1)
+        a = - 10000 + ((r * 256 * 256 + g * 256 + b) * .1)
         return a * 1000 if unit == 'mm' else a
 
     def calculate_row_quantity(self):
-        self._row_quantity = int(self.row_limit * self._density)
+        a = int(self.row_limit * self._density)
+        self._row_quantity = a if a < self._matrix.shape[0] else self._matrix.shape[0]
 
     def calculate_vertices_indices(self):
         width, height, deep = self._matrix.shape
@@ -75,11 +85,12 @@ class TerrainTile(BaseTile):
                     [i - self._row_quantity, i, i + 1, i - self._row_quantity + 1]
                 )
 
-        self.faces = result
+        self._faces = np.array(result)
 
     def calculate_vertices(self):
         unit = self._tile_size / (self._matrix.shape[0] - 1)
         coords = self._vertices_indices * unit
+        # coords = self._vertices_indices * unit
         coords += self._coords - [self._tile_size / 2, self._tile_size / 2]
         coords = np.array(coords)
         k = np.array(self.heights)
@@ -87,19 +98,20 @@ class TerrainTile(BaseTile):
         self._vertices = np.concatenate((coords, k), axis=1)
 
     def set_colour(self, colour):
-        self.colours = [colour] * len(self.vertices)
+        self._colours = [colour] * len(self.vertices)
+        self._mesh['c'] = self.colours
 
-    def create(self):
-        super().create()
+    @timeit
+    def setup(self):
+        super().setup()
         self.calculate_row_quantity()
         self.calculate_vertices_indices()
         self.calculate_heights()
         self.calculate_faces()
         self.calculate_vertices()
-        self.set_colour([255, 255, 255])
         self._mesh['v'] = self.vertices
         self._mesh['f'] = self.faces
-        self._mesh['c'] = self.colours
+        self.set_colour([255, 255, 255])
 
 
 if __name__ == '__main__':
@@ -116,5 +128,5 @@ if __name__ == '__main__':
     tile_index = [106667, 54827, 17]
 
     ttile = TerrainTile(cs, tile_index, matrix)
-    print(ttile.vertices)
+    print(ttile.mesh)
     ttile.dump_mesh(p2)

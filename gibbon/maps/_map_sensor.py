@@ -8,7 +8,7 @@ class MapSensor:
     def __init__(self, lnglat, radius):
         self._lnglat = np.array(lnglat)
         self._radius = radius
-        self.create()
+        self.setup()
 
     @property
     def origin(self):
@@ -36,15 +36,15 @@ class MapSensor:
 
     def set_lnglat(self, lnglat):
         self._lnglat = np.array(lnglat)
-        self.create()
+        self.setup()
 
     def set_raidus(self, radius):
         self._radius = radius
-        self.create()
+        self.setup()
 
     def set_row_limit(self, value):
         self.row_limit = value
-        self.create()
+        self.setup()
 
     def calculate_level(self):
         disses = list()
@@ -79,7 +79,7 @@ class MapSensor:
 
         self._tile_indices = np.array(result)
 
-    def create(self):
+    def setup(self):
         self.calculate_level()
         self.calculate_tile_size()
         self.calculate_center_index()

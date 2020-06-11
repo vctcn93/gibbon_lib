@@ -16,7 +16,7 @@ class ScorePoint:
 
         self._coords = np.array(coords)
         self._influence_range = influence_range
-        self.create()
+        self.setup()
 
     @property
     def type(self):
@@ -32,13 +32,13 @@ class ScorePoint:
 
     def set_coords(self, coords):
         self._coords = np.array(coords)
-        self.create()
+        self.setup()
 
     def set_influence_range(self, influence_range):
         self._influence_range = influence_range
-        self.create()
+        self.setup()
 
-    def create(self):
+    def setup(self):
         self.geo = Point(self._coords)
         self.buffer = self.geo.buffer(self._influence_range)
 
@@ -51,7 +51,7 @@ class Road(ScorePoint):
     def __init__(self, geometry, value, influence_range):
         ScorePoint.__init__(self, geometry, value, influence_range)
 
-    def create(self):
+    def setup(self):
         self.geo = LineString(self._coords)
         self.buffer = self.geo.buffer(self._influence_range)
 

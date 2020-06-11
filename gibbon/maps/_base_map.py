@@ -5,8 +5,12 @@ from gibbon.maps import MapSensor, BaseTile
 class BaseMap:
     def __init__(self, map_sensor):
         self.map_sensor = map_sensor
-        self.tiles = list()
+        self._tiles = list()
         self.create_tiles()
+
+    @property
+    def tiles(self):
+        return self._tiles
 
     @property
     def mesh(self):
@@ -17,7 +21,7 @@ class BaseMap:
             json.dump(self.mesh, f, ensure_ascii=False)
 
     def create_tiles(self):
-        self.tiles = [
+        self._tiles = [
             BaseTile(self.map_sensor.origin, index) for index in self.map_sensor.tile_indices
         ]
 

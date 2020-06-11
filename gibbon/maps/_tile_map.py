@@ -6,7 +6,7 @@ class TileMap(BaseMap):
         super().__init__(map_sensor)
 
     def create_tiles(self):
-        self.tiles = [
+        self._tiles = [
             NormalTile(self.map_sensor.origin, index) for index in self.map_sensor.tile_indices
         ]
 

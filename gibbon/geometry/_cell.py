@@ -6,14 +6,8 @@ class Cell:
     def __init__(self, coords: list, size: float = 300.0):
         self._coords = np.array(coords).astype(float)
         self._size = size
-        self._shape = None
-        self._vertices = None
-        self.colours = None
 
-        self.geo_center = None
-        self.geo = None
-
-        self.create()
+        self.setup()
         self.set_colour([255, 255, 255])
 
     @property
@@ -41,7 +35,7 @@ class Cell:
             'c': self.colours
         }
 
-    def create(self):
+    def setup(self):
         corners = [
             [-self.size / 2, -self.size / 2],
             [self.size / 2, -self.size / 2],
@@ -61,12 +55,12 @@ class Cell:
 
     def move(self, vector: list):
         self._coords += vector
-        self.create()
+        self.setup()
 
     def set_coords(self, coords):
         self._coords = np.array(coords)
-        self.create()
+        self.setup()
 
     def set_size(self, size):
         self.size = size
-        self.create()
+        self.setup()

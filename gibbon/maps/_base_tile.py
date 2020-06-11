@@ -7,7 +7,7 @@ class BaseTile:
     def __init__(self, origin, tile_index):
         self._origin = np.array(origin)
         self._tile_index = np.array(tile_index)
-        self.create()
+        self.setup()
 
     @property
     def tile_size(self):
@@ -15,7 +15,7 @@ class BaseTile:
 
     @property
     def tile_index(self):
-        return self._tile_index.tolist()
+        return tuple(self._tile_index.tolist())
 
     @property
     def level(self):
@@ -55,7 +55,15 @@ class BaseTile:
             'c': [[]]
         }
 
-    def create(self):
+    def set_origin(self, origin):
+        self._origin = np.array(origin)
+        self.setup()
+
+    def set_tile_index(self, tile_index):
+        self._tile_index = np.array(tile_index)
+        self.setup()
+
+    def setup(self):
         self.calculate_tile_size()
         self.calculate_coords()
         self.calculate_lnglat()
