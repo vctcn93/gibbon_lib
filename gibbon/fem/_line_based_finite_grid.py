@@ -7,7 +7,7 @@ class LineBasedFiniteGrid(FiniteGrid):
     def __init__(
         self,
         polyline: list,
-        density: float
+        density: float = 1
     ):
         super().__init__(polyline, density)
 

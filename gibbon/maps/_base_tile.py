@@ -4,10 +4,14 @@ from gibbon.utility import Convert
 
 
 class BaseTile:
-    def __init__(self, origin, tile_index):
-        self._origin = np.array(origin)
+    def __init__(self, origin_tile_index, tile_index):
+        self._origin_tile_index = np.array(origin_tile_index)
         self._tile_index = np.array(tile_index)
         self.setup()
+
+    @property
+    def origin_tile_index(self):
+        return tuple(self._origin_tile_index.tolist())
 
     @property
     def tile_size(self):
@@ -26,10 +30,6 @@ class BaseTile:
         return self._coords.tolist()
 
     @property
-    def lnglat(self):
-        return self._lnglat.tolist()
-
-    @property
     def mesh(self):
         return self._mesh
 
@@ -37,15 +37,9 @@ class BaseTile:
         self._tile_size = Convert.tile_size_by_zoom(self.level)
 
     def calculate_coords(self):
-        lnglat = Convert.tile_index_to_lnglat(self._tile_index)
-        coords = Convert.lnglat_to_mercator(lnglat, self._origin)
-        self._coords = np.array(
-            [coords[0] + self._tile_size / 2, coords[1] - self._tile_size / 2]
-        )
-
-    def calculate_lnglat(self):
-        lnglat = Convert.mercator_to_lnglat(self._coords / 1000, self._origin)
-        self._lnglat = np.array(lnglat)
+        diss = self._tile_index - self._origin_tile_index
+        coords = self._tile_size * diss
+        self._coords = np.flip(coords[:-1])
 
     def create_mesh(self):
         self._mesh = {
@@ -66,7 +60,6 @@ class BaseTile:
     def setup(self):
         self.calculate_tile_size()
         self.calculate_coords()
-        self.calculate_lnglat()
         self.create_mesh()
 
     def dump_mesh(self, path):
@@ -76,8 +69,8 @@ class BaseTile:
 
 if __name__ == '__main__':
     cs = [112.970840, 28.198560]
+    center_tile_index = Convert.lnglat_to_tile_index(cs, 17)
     tile_index = [106667, 54827, 17]
-    tile = BaseTile(cs, tile_index)
+    tile = BaseTile(center_tile_index, tile_index)
     print(tile.tile_size)
     print(tile.coords)
-    print(tile.lnglat)

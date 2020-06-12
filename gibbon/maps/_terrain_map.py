@@ -1,6 +1,7 @@
 from gibbon.maps import BaseMap, TerrainTile
 from gibbon.web_api import MapBox
 from threading import Thread, Lock
+import numpy as np
 import json
 import time
 
@@ -30,12 +31,14 @@ class TerrainMap(BaseMap):
 
     def dump_tensor(self, path):
         with open(path, 'w', encoding='utf-8') as f:
-            json.dump(self.tensor, f)
+            data = {str(key): value.tolist() for key, value in self.tensor.items()}
+            json.dump(data, f)
 
     def load_tensor(self, path):
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            self.tensor = data
+            tensor = {eval(key): np.array(value) for key, value in data.items()}
+            self.tensor = tensor
 
     def create_tiles(self):
         self._tiles = dict()
@@ -45,7 +48,8 @@ class TerrainMap(BaseMap):
 
             if index in self.loaded_indices:
                 matrix = self.tensor[index]
-                self._tiles[index] = TerrainTile(self.map_sensor.origin,
+                self._tiles[index] = TerrainTile(
+                    self.map_sensor.center_index,
                     tile_index,
                     matrix
                 )
@@ -74,7 +78,7 @@ class TerrainMap(BaseMap):
                 time.sleep(.02)
 
         obj = callback(
-            self.map_sensor.origin,
+            self.map_sensor.center_index,
             tile_index,
             matrix,
             density 

@@ -7,7 +7,7 @@ import gibbon.geometry.vector_math as vmath
 class FiniteGrid:
     quantity_limit = 1000
 
-    def __init__(self, polyline: list, density: float):
+    def __init__(self, polyline: list, density: float = 1):
         self._polyline = np.array(polyline)
         self._density = density
 

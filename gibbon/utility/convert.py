@@ -2,9 +2,9 @@ import math
 
 
 def _is_in_china(func):
-    def wrapper(lnglat):
+    def wrapper(cls, lnglat):
         if 72.004 < lnglat[0] < 137.8347 and .8293 < lnglat[1] < 55.8271:
-            return func(lnglat)
+            return func(cls, lnglat)
         return lnglat
     return wrapper
 
@@ -203,22 +203,6 @@ class Convert:
         lat = math.degrees(lat_rad)
         return [lng, lat]
 
-
-    def indices_by_lnglat_level_radius(lnglat: list, level: int, radius: float) -> list:
-        result = list()
-
-        x, y, z = lnglat_to_tile_index(lnglat, level)
-        tile_size = tile_size_by_zoom(z, 'm')
-        num = int(radius / tile_size)
-
-        xstart, ystart = x - num, y - num
-
-        for i in range(int(2 * num)):
-            for j in range(int(2 * num)):
-                result.append([int(xstart + i), int(ystart + j), z])
-
-        return result
-
     @classmethod
     def tile_size_by_zoom(cls, level: int, unit='mm'):
         """
@@ -236,3 +220,24 @@ class Convert:
     @staticmethod
     def hex_to_rgb(hex: str) -> tuple:
         return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
+
+    @staticmethod
+    def to_tuple(location: str) -> tuple:
+        """
+        将字符格式的经纬坐标转为数字列表格式的经纬坐标，用以计算
+        :param location: str 如'123.456, 123.456'
+        :return: tuple 如(123.456, 123.456)
+        """
+        # 预设location为'123.456, 123.456'
+        return eval(location)
+
+    @staticmethod
+    def to_string(location: tuple) -> str:
+        """
+        将数字列表格式的经纬坐标转为字符格式的经纬坐标，用以请求
+        :param location: list 如[123.456, 123.456]
+        :return: str 如'123.456, 123.456'
+        """
+        # 预设location为[123.456, 123.456]
+        # 输出 '123.456, 123.456'
+        return ','.join(list(map(str, location)))

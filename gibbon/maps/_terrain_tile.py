@@ -1,15 +1,15 @@
 import numpy as np
 from gibbon.maps import BaseTile
-from gibbon.utility import timeit
+from gibbon.utility import timeit, Convert
 
 
 class TerrainTile(BaseTile):
     row_limit = 10
 
-    def __init__(self, origin, tile_index, matrix, density=1):
+    def __init__(self, origin_tile_index, tile_index, matrix, density=1):
         self._matrix = np.array(matrix)
         self._density = density
-        super().__init__(origin, tile_index)
+        super().__init__(origin_tile_index, tile_index)
 
     @property
     def row_quantity(self):
@@ -56,21 +56,12 @@ class TerrainTile(BaseTile):
         self._row_quantity = a if a < self._matrix.shape[0] else self._matrix.shape[0]
 
     def calculate_vertices_indices(self):
-        width, height, deep = self._matrix.shape
-        wgap, hgap = int(width / self._row_quantity), int(height / self._row_quantity)
-
-        indices = list()
-
-        for i in range(self._row_quantity - 1):
-            for j in range(self._row_quantity - 1):
-                indices.append([i*wgap, j*hgap])
-            indices.append([i*wgap, height-1])
-
-        for i in range(self._row_quantity - 1):
-            indices.append([width-1, i*hgap])
-        indices.append([width-1, height-1])
-
-        self._vertices_indices = np.array(indices)
+        column = np.linspace(0, self._matrix.shape[0]-1, self._row_quantity, dtype=int)
+        row = np.linspace(0, self._matrix.shape[1]-1, self._row_quantity, dtype=int)
+        indices = np.array(np.meshgrid(column, row))
+        vertices_indices = indices.T
+        shape = vertices_indices.shape
+        self._vertices_indices = vertices_indices.reshape([shape[0]*shape[1], shape[2]])
 
     def calculate_heights(self):
         r, g, b = self._matrix[:, :, 0], self._matrix[:, :, 1], self._matrix[:, :, 2]
@@ -78,23 +69,21 @@ class TerrainTile(BaseTile):
 
     def calculate_faces(self):
         result = list()
+        basic = np.array([0, self._row_quantity, self._row_quantity + 1, 1])
 
-        for i in range(self._row_quantity, self._row_quantity ** 2):
-            if i % self._row_quantity != self._row_quantity - 1:
-                result.append(
-                    [i - self._row_quantity, i, i + 1, i - self._row_quantity + 1]
-                )
+        for i in range(self._row_quantity - 1):
+            for j in range(self._row_quantity - 1):
+                param = i * 10 + j
+                c = basic + param
+                result.append(c)
 
         self._faces = np.array(result)
 
     def calculate_vertices(self):
         unit = self._tile_size / (self._matrix.shape[0] - 1)
         coords = self._vertices_indices * unit
-        # coords = self._vertices_indices * unit
         coords += self._coords - [self._tile_size / 2, self._tile_size / 2]
-        coords = np.array(coords)
-        k = np.array(self.heights)
-        k = k.reshape([len(k), 1])
+        k = np.expand_dims(np.array(self.heights), axis=1)
         self._vertices = np.concatenate((coords, k), axis=1)
 
     def set_colour(self, colour):
@@ -125,8 +114,9 @@ if __name__ == '__main__':
 
     matrix = tensor[0]
     cs = [112.970840, 28.198560]
+    center_tile_index = Convert.lnglat_to_tile_index(cs, 17)
     tile_index = [106667, 54827, 17]
 
-    ttile = TerrainTile(cs, tile_index, matrix)
+    ttile = TerrainTile(center_tile_index, tile_index, matrix)
     print(ttile.mesh)
     ttile.dump_mesh(p2)

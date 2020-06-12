@@ -6,7 +6,7 @@ class BaseMap:
     def __init__(self, map_sensor):
         self.map_sensor = map_sensor
         self._tiles = list()
-        self.create_tiles()
+        # self.create_tiles()
 
     @property
     def tiles(self):
@@ -22,7 +22,7 @@ class BaseMap:
 
     def create_tiles(self):
         self._tiles = [
-            BaseTile(self.map_sensor.origin, index) for index in self.map_sensor.tile_indices
+            BaseTile(self.map_sensor.center_index, index) for index in self.map_sensor.tile_indices
         ]
 
 
@@ -30,4 +30,6 @@ if __name__ == '__main__':
     cs = [112.970840, 28.198560]
     msensor = MapSensor(cs, 2000)
     bmap = BaseMap(msensor)
+    print(bmap.mesh, len(bmap.mesh))
+    bmap.create_tiles()
     print(bmap.mesh, len(bmap.mesh))

@@ -5,7 +5,7 @@ from ._finite_grid import FiniteGrid
 
 
 class ShapeBasedFiniteGrid(FiniteGrid):
-    def __init__(self, geometry, density):
+    def __init__(self, geometry, density: float = 1):
         super().__init__(geometry, density)
 
     def setup(self):

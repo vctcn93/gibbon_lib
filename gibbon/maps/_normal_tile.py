@@ -1,10 +1,11 @@
 import numpy as np
 from gibbon.maps import BaseTile
+from gibbon.utility import Convert
 
 
 class NormalTile(BaseTile):
-    def __init__(self, origin, tile_index):
-        super().__init__(origin, tile_index)
+    def __init__(self, origin_tile_index, tile_index):
+        super().__init__(origin_tile_index, tile_index)
 
     @property
     def vertices(self):
@@ -28,10 +29,10 @@ class NormalTile(BaseTile):
 
 if __name__ == '__main__':
     cs = [112.970840, 28.198560]
+    center_tile_index = Convert.lnglat_to_tile_index(cs, 17)
     tile_index = [106667, 54827, 17]
-    tile = NormalTile(cs, tile_index)
+    tile = NormalTile(center_tile_index, tile_index)
     print(tile.tile_size)
     print(tile.coords)
-    print(tile.lnglat)
     print(tile.vertices)
     print(tile.mesh)
