@@ -114,6 +114,7 @@ class Amap:
         :param extensions: 此项默认返回基本地址信息；取值为 'all' 返回地址信息、附近POI、道路以及道路交叉口信息。
         :return: pd.DataFrame
         """
+        results = list()
         gcj02 = Convert.wgs84togcj02(lnglat)
         str_lnglat = Convert.to_string(gcj02)
 
@@ -133,10 +134,20 @@ class Amap:
 
         response = requests.get(url, params=params)
         content = json.loads(response.content)
-        results = pd.DataFrame(content['pois'])
-        results['coord_sys'] = 'gcj02'
+        results += content['pois']
 
-        return results
+        turns = int(eval(content['count'])/offset)
+
+        for i in range(1, turns + 1):
+            params['page'] = i + 1
+            response = requests.get(url, params=params)
+            content = json.loads(response.content)
+            results += content['pois']
+
+        df = pd.DataFrame(results)
+        df['coord_sys'] = 'gcj02'
+
+        return df
 
     def pois_by_keyword_city(
         self,
@@ -165,6 +176,7 @@ class Amap:
         :param extensions: 此项默认返回基本地址信息；取值为 'all' 返回地址信息、附近POI、道路以及道路交叉口信息。
         :return: pd.DataFrame
         """
+        results = list()
         url = 'https://restapi.amap.com/v3/place/text?'
         params = {
             'key': self.key,
@@ -182,10 +194,20 @@ class Amap:
 
         response = requests.get(url, params=params)
         content = json.loads(response.content)
-        results = pd.DataFrame(content['pois'])
-        results['coord_sys'] = 'gcj02'
+        results += content['pois']
 
-        return results
+        turns = int(eval(content['count'])/offset)
+
+        for i in range(1, turns + 1):
+            params['page'] = i + 1
+            response = requests.get(url, params=params)
+            content = json.loads(response.content)
+            results += content['pois']
+
+        df = pd.DataFrame(results)
+        df['coord_sys'] = 'gcj02'
+
+        return df
 
     def walking_path_by_origin_destination(
         self,
@@ -390,7 +412,7 @@ class Amap:
         content = json.loads(response.content)
         roads = content['roads']
 
-        return roads
+        return pd.DataFrame(roads)
 
     @staticmethod
     def texture_by_tile_index(
