@@ -1,5 +1,6 @@
-from ._finite_cell import FiniteCell
-from ._finite_grid import FiniteGrid
+import numpy as np
+from gibbon.fem import FiniteCell
+from gibbon.fem import FiniteGrid
 import gibbon.geometry.vector_math as vmath
 
 
@@ -13,13 +14,20 @@ class LineBasedFiniteGrid(FiniteGrid):
 
     def setup(self):
         super().setup()
-        params = self.divide_by_quantity(self._quantity)
-        points = list()
-
-        points = [
-            vmath.point_at_parameter_polyline(
-                self._polyline, param
-            ) for param in params
-        ]
         size = self.geo.length / self._quantity
-        self.cells = [FiniteCell(point, size) for point in points]
+        params = np.linspace(0, 1, self._quantity)
+
+        def f(x):
+            point = vmath.point_at_parameter_polyline(
+                self._polyline, x
+            )
+            return FiniteCell(point, size)
+
+        cells = np.vectorize(f)(params)
+        self.cells = cells.tolist()
+
+
+if __name__ == '__main__':
+    lgrid = LineBasedFiniteGrid([[0, 0], [100, 100]])
+    print(type(lgrid.cells))
+    print(len(lgrid.cells))

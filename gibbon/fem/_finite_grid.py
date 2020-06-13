@@ -42,16 +42,6 @@ class FiniteGrid:
     def mesh(self):
         return [c.mesh for c in self.cells]
 
-    @staticmethod
-    def divide_by_quantity(quantity):
-        ls = list(range(quantity))
-        new = [0] * quantity
-
-        for i in range(quantity):
-            new[i] = ls[i] / (quantity - 1)
-
-        return new
-
     def set_quantity_limit(self, value):
         self.quantity_limit = value
         self.setup()

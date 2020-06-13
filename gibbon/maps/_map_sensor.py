@@ -3,7 +3,7 @@ from gibbon.utility import Convert
 
 
 class MapSensor:
-    row_limit = 6
+    row_limit = 7
 
     def __init__(self, lnglat, radius):
         self._lnglat = np.array(lnglat)
@@ -47,18 +47,15 @@ class MapSensor:
         self.setup()
 
     def calculate_level(self):
-        disses = list()
+        levels = np.arange(10, 19).astype(float)
 
-        for i in range(10, 19):
-            size = Convert.tile_size_by_zoom(i, 'm')
-            quantity = self._radius / size
-            diss = abs(quantity - self.row_limit)
-            disses.append(diss)
+        def f(x): 
+            size = Convert.tile_size_by_zoom(x, 'm') 
+            quantity = self._radius / size 
+            return abs(quantity - self.row_limit) 
 
-        minimum = min(disses)
-        index = disses.index(minimum)
-
-        self._level = 10 + index
+        disses = np.vectorize(f)(levels)
+        self._level = int(10 + np.argmin(disses))
 
     def calculate_tile_size(self):
         self._tile_size = Convert.tile_size_by_zoom(self._level)
@@ -68,16 +65,18 @@ class MapSensor:
         self._center_index = np.array(center_index)
 
     def calculate_tile_indices(self):
-        result = list()
-
         x, y, z = self.center_index
-        xstart, ystart = x - int(self.row_limit / 2), y - int(self.row_limit / 2)
+        diss = self.row_limit / 2
+        xs = np.arange(x - diss + 1, x + diss + 1)
+        ys = np.arange(y - diss + 1, y + diss + 1)
+        grid = np.meshgrid(xs, ys)
 
-        for i in range(int(self.row_limit)):
-            for j in range(int(self.row_limit)):
-                result.append([int(xstart + i), int(ystart + j), z])
+        zs = np.zeros_like(grid[0])
+        zs[:] = z
+        grid.append(zs)
 
-        self._tile_indices = np.array(result)
+        xyz = np.array(grid).astype(int).T
+        self._tile_indices = xyz.reshape(self.row_limit ** 2, 3)
 
     def setup(self):
         self.calculate_level()

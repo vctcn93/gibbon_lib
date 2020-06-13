@@ -20,7 +20,7 @@ setup(
     include_dirs = [np.get_include()],
     packages=packages,
     #long_description=rm,
-    install_requires=['numpy', 'pytest', 'networkx', 'flask', 'scipy', 'pillow',
+    install_requires=['numpy', 'pandas', 'pytest', 'networkx', 'flask', 'scipy', 'pillow',
                     'shapely'],
     zip_safe=False
 )
