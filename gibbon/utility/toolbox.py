@@ -36,3 +36,7 @@ def divide_by_quantity(quantity):
         new[i] = ls[i] / (quantity - 1)
 
     return new
+
+
+def flag(name):
+    print(f'>>>>>>>> this is flag {name} >>>>>>>')

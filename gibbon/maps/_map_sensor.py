@@ -34,6 +34,10 @@ class MapSensor:
     def tile_indices(self):
         return self._tile_indices.tolist()
 
+    @property
+    def bounds(self):
+        return self._bounds.tolist()
+
     def set_lnglat(self, lnglat):
         self._lnglat = np.array(lnglat)
         self.setup()
@@ -78,19 +82,38 @@ class MapSensor:
         xyz = np.array(grid).astype(int).T
         self._tile_indices = xyz.reshape(self.row_limit ** 2, 3)
 
+    def calculate_bounds(self):
+        extremums = np.array(
+            [
+                np.min(self._tile_indices, axis=0),
+                np.max(self._tile_indices, axis=0)
+            ]
+        )
+        diss = extremums - self._center_index
+        bounds = diss * self._tile_size
+        fix = [
+            [-self._tile_size, -self._tile_size, 0], 
+            [self._tile_size, self._tile_size, 0]
+        ]
+        bounds += fix
+
+        self._bounds = np.delete(bounds, -1, axis=1)
+
     def setup(self):
         self.calculate_level()
         self.calculate_tile_size()
         self.calculate_center_index()
         self.calculate_tile_indices()
+        self.calculate_bounds()
 
 
 if __name__ == '__main__':
-    cs = [112.970840, 28.198560]
-    msensor = MapSensor(cs, 2000)
+    origin=[113.520280, 22.130790]
+    msensor = MapSensor(origin, 2000)
     print(msensor.level)
     print(msensor.tile_size)
     print(msensor.tile_indices)
     print(msensor.center_index)
     print(len(msensor.tile_indices))
     print(msensor.tile_indices.index(msensor.center_index))
+    print(msensor.bounds)
