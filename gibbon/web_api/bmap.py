@@ -173,8 +173,7 @@ class Bmap:
         """
         pois = list()
         lng_min, lat_min, lng_max, lat_max = bounds
-        bounds = f"{Convert.to_string(lat_min)},{Convert.to_string(lng_min)}," \
-                + f"{Convert.to_string(lat_max)},{Convert.to_string(lng_max)}"
+        bounds = f"{str(lat_min)},{str(lng_min)},{str(lat_max)},{str(lng_max)}"
 
         url = 'http://api.map.baidu.com/place/v2/search?'
         params = {

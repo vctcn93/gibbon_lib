@@ -1,7 +1,9 @@
 from gibbon.maps import MapSensor, TileMap, TerrainMap
 from gibbon.fem import ShapeBasedFiniteGrid, LineBasedFiniteGrid
 from gibbon.utility import Convert
+from gibbon.web_api import Amap, Bmap
 from shapely.geometry import Polygon
+import pandas as pd
 
 
 class Project:
@@ -20,9 +22,17 @@ class Project:
         bounds = self.sensor.bounds
         line = [bounds[0], [bounds[1][0], bounds[0][1]], bounds[1], [bounds[0][0], bounds[1][1]]]
         self.fem_map = ShapeBasedFiniteGrid(line, density)
+        self.amap = Amap()
+        self.bmap = Bmap()
+
+    def pois_by_keyword(self, keyword):
+        llbounds = self.sensor.llbounds[0] + self.sensor.llbounds[1]
+        return self.bmap.pois_by_keyword_bounds(keyword, llbounds)
 
     def setup(self):
         pass
+
+    
 
 
 if __name__ == '__main__':
@@ -62,3 +72,20 @@ if __name__ == '__main__':
     project.fem_red_line.dump_mesh(path + r'\fem_red_line.json')
     project.fem_site.dump_mesh(path + r'\fem_site.json')
     project.fem_map.dump_mesh(path + r'\fem_map.json')
+
+    dfs = list()
+    kinds = ['公交车站', '住宅']
+
+    for k in kinds:
+        pois = project.pois_by_keyword(k)
+        location, names = pois['location'], pois['name']
+        lnglats = location.apply(lambda x: [x['lng'], x['lat']])
+        coords = lnglats.apply(
+            lambda x: Convert.lnglat_to_mercator(x, project.sensor.origin)
+        )
+
+        rst = pd.DataFrame()
+        rst['names'] = names
+        rst['lnglat'] = lnglats
+        rst['coords'] = coords
+        rst.to_json(path + f'/{k}.json')

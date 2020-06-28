@@ -38,6 +38,10 @@ class MapSensor:
     def bounds(self):
         return self._bounds.tolist()
 
+    @property
+    def llbounds(self):
+        return self._llbounds
+
     def set_lnglat(self, lnglat):
         self._lnglat = np.array(lnglat)
         self.setup()
@@ -98,6 +102,7 @@ class MapSensor:
         bounds += fix
 
         self._bounds = np.delete(bounds, -1, axis=1)
+        self._llbounds = list(map(lambda x: Convert.mercator_to_lnglat(x, self.origin), self._bounds / 1000))
 
     def setup(self):
         self.calculate_level()
@@ -117,3 +122,4 @@ if __name__ == '__main__':
     print(len(msensor.tile_indices))
     print(msensor.tile_indices.index(msensor.center_index))
     print(msensor.bounds)
+    print(msensor.llbounds)

@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 
 def _is_in_china(func):
@@ -222,14 +223,14 @@ class Convert:
         return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
 
     @staticmethod
-    def to_tuple(location: str) -> tuple:
+    def to_list(location: str) -> tuple:
         """
         将字符格式的经纬坐标转为数字列表格式的经纬坐标，用以计算
         :param location: str 如'123.456, 123.456'
         :return: tuple 如(123.456, 123.456)
         """
         # 预设location为'123.456, 123.456'
-        return eval(location)
+        return list(eval(location))
 
     @staticmethod
     def to_string(location: tuple) -> str:
@@ -241,3 +242,20 @@ class Convert:
         # 预设location为[123.456, 123.456]
         # 输出 '123.456, 123.456'
         return ','.join(list(map(str, location)))
+
+    @staticmethod
+    def stringtolist(string, reverse=False):
+        """
+        string = "113.52546031343,22.129509715856;113.52673029534,22.12949968767;113.52803031317,22.129279677622;113.52832026393,22.129219617399;113.52899033426,22.12907959059;
+        113.53028032877,22.128819536949;113.53039032742,22.128789572229;113.5322202692,22.12864953033;113.53390023979,22.128729548104;113.53566024254,22.128759520287;113.5
+        3599023855,22.128759507971;113.53607024919,22.128759566279;113.53644027672,22.128759511018;113.53818016921,22.128749559991;113.53828022438,22.128749595569;113.5385
+        101591,22.12874961982;113.53944022455,22.128739604046"
+        """
+        ls = string.split(';')
+        c = list(map(eval, ls))
+        d = np.array(c)
+
+        if reverse:
+            d = np.flip(d, axis=1)
+
+        return d.tolist()

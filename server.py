@@ -1,21 +1,21 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from gibbon.project import Project
 import configparser
-import os, sys, re
+import os, sys, re, json
+
 
 project = None
 app = Flask(__name__)
 
 
 # global project parameter
-ORIGIN = [0, 0]
+DIRECTORY = 'templates/html'
 
 
 @app.route('/connect')
 def connect():
-    return """<h1> GIBBON SERVER </h1>
-    <p> Now the server is connected, you can calculate your data with cpython. </p>
-    """
+    send_from_directory
+    return send_from_directory(DIRECTORY, 'welcome.html')
 
 
 @app.route('/display')
@@ -24,18 +24,5 @@ def display():
     return ''
 
 
-def setup():
-    pass
-
-
-def phase_config():
-    config = configparser.ConfigParser()
-    project = sys.argv[1]
-    config_path = f'{project}/config.ini'
-    config.read(config_path)
-    return config._sections.values()
-
-
 if __name__ == '__main__':
-    setup()
     app.run()
