@@ -1,3 +1,4 @@
+import numpy as np
 from gibbon.maps import MapSensor, NormalTile, BaseMap
 
 
@@ -6,9 +7,8 @@ class TileMap(BaseMap):
         super().__init__(map_sensor)
 
     def create_tiles(self):
-        self._tiles = [
-            NormalTile(self.map_sensor.center_index, index) for index in self.map_sensor.tile_indices
-        ]
+        f = lambda x: NormalTile(x, self.map_sensor.center_index)
+        self._tiles = np.apply_along_axis(f, 2, self.map_sensor._indices)
 
 
 if __name__ == '__main__':
@@ -17,4 +17,5 @@ if __name__ == '__main__':
     tmap = TileMap(msensor)
     print(tmap.mesh, len(tmap.mesh))
     tmap.create_tiles()
+    print(tmap._mesh, len(tmap._mesh))
     print(tmap.mesh, len(tmap.mesh))

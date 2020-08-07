@@ -1,29 +1,43 @@
 import json
+import numpy as np
 from gibbon.maps import MapSensor, BaseTile
 
 
 class BaseMap:
     def __init__(self, map_sensor):
         self.map_sensor = map_sensor
-        self._tiles = list()
-        # self.create_tiles()
+        self._tiles = np.array([])
+
+    @property
+    def shape(self):
+        return self._tiles.shape
 
     @property
     def tiles(self):
-        return self._tiles
+        return self._tiles.tolist()
+
+    @property
+    def _mesh(self):
+        if len(self.tiles) > 0:
+            return np.vectorize(lambda x: x.mesh)(self._tiles)
+        return np.array([])
 
     @property
     def mesh(self):
-        return [tile.mesh for tile in self.tiles]
+        meshes = self._mesh
+
+        if len(self._mesh) > 0:
+            meshes = meshes.reshape(self.shape[0] * self.shape[1])
+
+        return meshes.tolist()
 
     def dump_mesh(self, path):
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.mesh, f, ensure_ascii=False)
 
     def create_tiles(self):
-        self._tiles = [
-            BaseTile(self.map_sensor.center_index, index) for index in self.map_sensor.tile_indices
-        ]
+        f = lambda x: BaseTile(x, self.map_sensor.center_index)
+        self._tiles = np.apply_along_axis(f, 2, self.map_sensor._indices)
 
 
 if __name__ == '__main__':
@@ -32,4 +46,5 @@ if __name__ == '__main__':
     bmap = BaseMap(msensor)
     print(bmap.mesh, len(bmap.mesh))
     bmap.create_tiles()
+    print(bmap._tiles.shape, bmap.tiles)
     print(bmap.mesh, len(bmap.mesh))

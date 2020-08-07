@@ -12,22 +12,15 @@ class TerrainMap(BaseMap):
     def __init__(self, map_sensor):
         self.web_api = MapBox()
         self.tensor = dict()
+        self.created_tiles = dict()
 
         self.thread_count = 0
         self.lock = Lock()
         super().__init__(map_sensor)
 
     @property
-    def loaded_indices(self):
+    def loaded_tensor(self):
         return list(self.tensor.keys())
-
-    @property
-    def current(self):
-        return list(self._tiles.keys())
-
-    @property
-    def tiles(self):
-        return list(self._tiles.values())
 
     def dump_tensor(self, path):
         with open(path, 'w', encoding='utf-8') as f:
@@ -41,22 +34,37 @@ class TerrainMap(BaseMap):
             self.tensor = tensor
 
     def create_tiles(self):
-        self._tiles = dict()
+        thread_list = list()
+        created_tiles = list(self.created_tiles.keys())
 
-        for tile_index in self.map_sensor.tile_indices:
-            index = tuple(tile_index)
+        for row in self.map_sensor.indices:
+            for tile_index in row:
+                index = tuple(tile_index)
 
-            if index in self.loaded_indices:
-                matrix = self.tensor[index]
-                self._tiles[index] = TerrainTile(
-                    self.map_sensor.center_index,
-                    tile_index,
-                    matrix
-                )
+                if index not in created_tiles:
+                    if index in self.loaded_tensor:
+                        matrix = self.tensor[index]
+                        self.created_tiles[index] = TerrainTile(
+                            self.map_sensor.center_index,
+                            tile_index,
+                            matrix
+                        )
 
-            else:
-                thread = Thread(target=self._create_tile_async, args=[tile_index, TerrainTile])
-                thread.start()
+                    else:
+                        thread = Thread(target=self._create_tile_async, args=[tile_index, TerrainTile])
+                        thread_list.append(thread)
+
+        for t in thread_list:
+            t.setDaemon(True)
+            t.start()
+
+        for t in thread_list:
+            t.join()
+
+        print(f'Finished >>> {len(thread_list)} tiles')
+
+        f = lambda x: self.created_tiles[tuple(x)]
+        self._tiles = np.apply_along_axis(f, 2, self.map_sensor._indices)
 
     def _create_tile_async(self, tile_index: tuple, callback, density=1):
         while self.thread_count > self.thread_limit:
@@ -86,9 +94,10 @@ class TerrainMap(BaseMap):
 
         index = tuple(tile_index)
         self.tensor[index] = matrix
-        self._tiles[index] = obj
+        self.created_tiles[index] = obj
 
         with self.lock:
             self.thread_count -= 1
 
         time.sleep(.01)
+        print(f'{tile_index} >>> Finished')

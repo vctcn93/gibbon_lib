@@ -31,8 +31,12 @@ class MapSensor:
         return self._center_index.tolist()
 
     @property
-    def tile_indices(self):
-        return self._tile_indices.tolist()
+    def indices(self):
+        return self._indices.tolist()
+
+    @property
+    def shape(self):
+        return self._indices.shape
 
     @property
     def bounds(self):
@@ -72,7 +76,7 @@ class MapSensor:
         center_index = Convert.lnglat_to_tile_index(self._lnglat, self._level)
         self._center_index = np.array(center_index)
 
-    def calculate_tile_indices(self):
+    def calculate_indices(self):
         x, y, z = self.center_index
         diss = self.row_limit / 2
         xs = np.arange(x - diss + 1, x + diss + 1)
@@ -83,16 +87,13 @@ class MapSensor:
         zs[:] = z
         grid.append(zs)
 
-        xyz = np.array(grid).astype(int).T
-        self._tile_indices = xyz.reshape(self.row_limit ** 2, 3)
+        self._indices = np.array(grid).astype(int).T
 
     def calculate_bounds(self):
-        extremums = np.array(
-            [
-                np.min(self._tile_indices, axis=0),
-                np.max(self._tile_indices, axis=0)
-            ]
-        )
+        extremums = [
+            np.min(self._indices, axis=(0, 1)),
+            np.max(self._indices, axis=(0, 1))
+        ]
         diss = extremums - self._center_index
         bounds = diss * self._tile_size
         fix = [
@@ -100,15 +101,19 @@ class MapSensor:
             [self._tile_size, self._tile_size, 0]
         ]
         bounds += fix
-
         self._bounds = np.delete(bounds, -1, axis=1)
-        self._llbounds = list(map(lambda x: Convert.mercator_to_lnglat(x, self.origin), self._bounds / 1000))
+        self._llbounds = list(
+            map(
+                lambda x: Convert.mercator_to_lnglat(x, self.origin),
+                self._bounds / 1000
+            )
+        )
 
     def setup(self):
         self.calculate_level()
         self.calculate_tile_size()
         self.calculate_center_index()
-        self.calculate_tile_indices()
+        self.calculate_indices()
         self.calculate_bounds()
 
 
@@ -117,9 +122,8 @@ if __name__ == '__main__':
     msensor = MapSensor(origin, 2000)
     print(msensor.level)
     print(msensor.tile_size)
-    print(msensor.tile_indices)
+    print(msensor.indices)
     print(msensor.center_index)
-    print(len(msensor.tile_indices))
-    print(msensor.tile_indices.index(msensor.center_index))
+    print(len(msensor.indices))
     print(msensor.bounds)
     print(msensor.llbounds)

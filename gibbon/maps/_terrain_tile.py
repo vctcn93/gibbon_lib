@@ -1,6 +1,7 @@
 import numpy as np
+from scipy.spatial import distance as spd 
 from gibbon.maps import BaseTile
-from gibbon.utility import timeit, Convert
+from gibbon.utility import Convert
 
 
 class TerrainTile(BaseTile):
@@ -30,13 +31,13 @@ class TerrainTile(BaseTile):
     @property
     def heights(self):
         return self._heights[
-            self._vertices_indices[:, 0],
-            self._vertices_indices[:, 1],
+            self._vertices_indices.T[0],
+            self._vertices_indices.T[1]
         ].tolist()
 
     @property
     def faces(self):
-        return self._faces.tolist()
+        return self._faces.reshape(-1, 4).tolist()
 
     @property
     def colours(self):
@@ -44,7 +45,7 @@ class TerrainTile(BaseTile):
 
     @property
     def vertices(self):
-        return self._vertices.tolist()
+        return self._vertices.reshape(-1, 3).tolist()
 
     @staticmethod
     def height_by_rgb(r, g, b, unit='mm'):
@@ -59,38 +60,30 @@ class TerrainTile(BaseTile):
         column = np.linspace(0, self._matrix.shape[0]-1, self._row_quantity, dtype=int)
         row = np.linspace(0, self._matrix.shape[1]-1, self._row_quantity, dtype=int)
         indices = np.array(np.meshgrid(column, row))
-        vertices_indices = indices.T
-        shape = vertices_indices.shape
-        self._vertices_indices = vertices_indices.reshape([shape[0]*shape[1], shape[2]])
+        self._vertices_indices = indices.T
 
     def calculate_heights(self):
         r, g, b = self._matrix[:, :, 0], self._matrix[:, :, 1], self._matrix[:, :, 2]
         self._heights = np.vectorize(self.height_by_rgb)(r, g, b)
+        # ! How to rotate it?
+        # self._heights = np.rot90(self._heights, axes=(1, 0))
 
     def calculate_faces(self):
-        result = list()
         basic = np.array([0, self._row_quantity, self._row_quantity + 1, 1])
-
-        for i in range(self._row_quantity - 1):
-            for j in range(self._row_quantity - 1):
-                param = i * 10 + j
-                c = basic + param
-                result.append(c)
-
-        self._faces = np.array(result)
+        count = self._row_quantity - 1
+        shape = [np.arange(count) + i * 10 for i in range(count)]
+        self._faces = np.add.outer(shape, basic)
 
     def calculate_vertices(self):
         unit = self._tile_size / (self._matrix.shape[0] - 1)
         coords = self._vertices_indices * unit
         coords += self._coords - [self._tile_size / 2, self._tile_size / 2]
-        k = np.expand_dims(np.array(self.heights), axis=1)
-        self._vertices = np.concatenate((coords, k), axis=1)
+        self._vertices = np.stack((coords.T[0], coords.T[1], self.heights), axis=2)
 
     def set_colour(self, colour):
-        self._colours = [colour] * len(self.vertices)
+        self._colours = np.ones_like(self._vertices)
         self._mesh['c'] = self.colours
 
-    @timeit
     def setup(self):
         super().setup()
         self.calculate_row_quantity()
@@ -100,23 +93,3 @@ class TerrainTile(BaseTile):
         self.calculate_vertices()
         self._mesh['v'] = self.vertices
         self._mesh['f'] = self.faces
-        self.set_colour([255, 255, 255])
-
-
-if __name__ == '__main__':
-    import json
-
-    path = r'C:\Users\wenhs\Desktop\tensor_backup.json'
-    p2 = r'C:\Users\wenhs\Desktop\ttile.json'
-
-    with open(path, 'r', encoding='utf-8') as f:
-        tensor = json.load(f)
-
-    matrix = tensor[0]
-    cs = [112.970840, 28.198560]
-    center_tile_index = Convert.lnglat_to_tile_index(cs, 17)
-    tile_index = [106667, 54827, 17]
-
-    ttile = TerrainTile(center_tile_index, tile_index, matrix)
-    print(ttile.mesh)
-    ttile.dump_mesh(p2)

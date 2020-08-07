@@ -1,4 +1,5 @@
 from flask import Flask, request, send_from_directory
+from flask_socketio import SocketIO
 from gibbon.project import Project
 import configparser
 import os, sys, re, json

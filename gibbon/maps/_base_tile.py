@@ -37,6 +37,7 @@ class BaseTile:
         self._tile_size = Convert.tile_size_by_zoom(self.level)
 
     def calculate_coords(self):
+        # ! How to rotate it?
         diss = self._tile_index - self._origin_tile_index
         coords = self._tile_size * diss
         self._coords = np.flip(coords[:-1])
@@ -70,7 +71,8 @@ class BaseTile:
 if __name__ == '__main__':
     cs = [112.970840, 28.198560]
     center_tile_index = Convert.lnglat_to_tile_index(cs, 17)
-    tile_index = [106667, 54827, 17]
+    # tile_index = [106667, 54827, 17]
+    tile_index = [106666, 54826, 17]
     tile = BaseTile(center_tile_index, tile_index)
     print(tile.tile_size)
     print(tile.coords)
