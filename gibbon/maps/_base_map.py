@@ -24,7 +24,7 @@ class BaseMap:
 
     @property
     def mesh(self):
-        meshes = self._mesh
+        meshes = self._mesh.copy()
 
         if len(self._mesh) > 0:
             meshes = meshes.reshape(self.shape[0] * self.shape[1])
@@ -35,7 +35,7 @@ class BaseMap:
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(self.mesh, f, ensure_ascii=False)
 
-    def create_tiles(self):
+    def create(self):
         f = lambda x: BaseTile(x, self.map_sensor.center_index)
         self._tiles = np.apply_along_axis(f, 2, self.map_sensor._indices)
 
@@ -45,6 +45,6 @@ if __name__ == '__main__':
     msensor = MapSensor(cs, 2000)
     bmap = BaseMap(msensor)
     print(bmap.mesh, len(bmap.mesh))
-    bmap.create_tiles()
+    bmap.create()
     print(bmap._tiles.shape, bmap.tiles)
     print(bmap.mesh, len(bmap.mesh))

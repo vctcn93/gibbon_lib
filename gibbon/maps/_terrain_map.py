@@ -33,7 +33,7 @@ class TerrainMap(BaseMap):
             tensor = {eval(key): np.array(value) for key, value in data.items()}
             self.tensor = tensor
 
-    def create_tiles(self):
+    def create(self):
         thread_list = list()
         created_tiles = list(self.created_tiles.keys())
 
