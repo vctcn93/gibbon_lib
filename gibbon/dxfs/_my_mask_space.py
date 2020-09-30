@@ -41,14 +41,30 @@ class MyMaskSpace(MaskSpace):
             df.set_value(id1, 'text', value)
 
         return df.drop(to_drop)
-    
+
+    @staticmethod
+    def delevel_by_type(df):
+        df['level'] = None
+        t = df['type'].unique()
+
+        for item in t:
+            a = df[df['type'] == item]
+            indices = list(range(len(a)))
+            indices.reverse()
+
+            for i in a.index:
+                level = indices.pop()
+                df['level'].iloc[i]= level
+
+        return df
+
     def manage_data(self):
         ls = list()
 
         for i in range(0, len(self._original_data), 4):
             try:
                 a = pd.DataFrame()
-                
+
                 types = self._original_data[i]['text'].values
                 heights = self._original_data[i+1]['text'].values
                 thickness = self._original_data[i+2]['text'].values
@@ -67,6 +83,8 @@ class MyMaskSpace(MaskSpace):
                 a['height'] = heights
                 a['thickness'] = thickness
                 a['x'], a['y'] = x, y
+
+                a = self.delevel_by_type(a)
                 ls.append(a)
 
             except Exception as e:
