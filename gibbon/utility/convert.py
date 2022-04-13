@@ -96,7 +96,7 @@ class Convert:
         mglat = lnglat[1] + dlat
         mglng = lnglat[0] + dlng
 
-        return [lnglat[1] * 2 - mglng, lnglat[0] * 2 - mglat]
+        return [lnglat[0] * 2 - mglng, lnglat[1] * 2 - mglat]
 
     @classmethod
     @_is_in_china
